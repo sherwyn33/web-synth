@@ -1,0 +1,10 @@
+[package]
+authors = ["Casey Primozic <casey@cprimozic.net>"]
+edition = "2021"
+name = "dsp"
+version = "0.1.0"
+
+[dependencies]
+fastapprox = "0.3"
+num-traits = "0.2"
+num-complex = "0.4"

@@ -74,6 +74,12 @@ const mkHandleAWPMessage = (recordingState: RecordingState) =>
         if (evt.data.index === recordingState.lastWrittenChunkIx + 1) {
           // We received an in-order chunk; write it into the samples buffer directly
           recordingState.lastWrittenChunkIx += 1;
+          if (typeof evt.data.sampleRate === 'number') {
+            recordingState.sampleRate = evt.data.sampleRate;
+          }
+          if (typeof evt.data.channelCount === 'number') {
+            recordingState.channelCount = evt.data.channelCount;
+          }
           inst.appendSamples(evt.data.block);
           inst.setBounds(inst.getBounds().startMs, await inst.getSampleLengthMs());
           return;
@@ -131,9 +137,17 @@ const getSampleRecorderSettings = (
               }
 
               // Throw away previous recording context if there was one
-              recordingState.current.waveformRenderer.reinitializeCtx();
+              recordingState.current.waveformRenderer.reinitializeCtx(
+                undefined,
+                ctx.sampleRate
+              );
+              recordingState.current.sampleRate = ctx.sampleRate;
+              recordingState.current.channelCount = 0;
 
-              awpNode.port.postMessage({ type: 'startRecording' });
+              awpNode.port.postMessage({
+                type: 'startRecording',
+                sampleRate: ctx.sampleRate,
+              });
               awpNode.port.onmessage = mkHandleAWPMessage(recordingState.current);
 
               recordingState.current.lastWrittenChunkIx = -1;
@@ -170,6 +184,8 @@ interface RecordingState {
   unwrittenChunks: { [key: number]: Float32Array };
   lastWrittenChunkIx: number;
   reRender: (() => void) | null;
+  channelCount: number;
+  sampleRate: number;
 }
 
 const buildDefaultRecordingState = (): RecordingState => ({
@@ -177,6 +193,8 @@ const buildDefaultRecordingState = (): RecordingState => ({
   unwrittenChunks: {},
   lastWrittenChunkIx: -1,
   reRender: null,
+  channelCount: 1,
+  sampleRate: ctx.sampleRate,
 });
 
 interface SampleRecorderInnerProps {

@@ -1,0 +1,10 @@
+[package]
+name = "common"
+version = "0.1.0"
+authors = ["Casey Primozic <casey@cprimozic.net>"]
+edition = "2021"
+
+[dependencies]
+uuid = { version = "1.2" }
+rand = "0.7.3"
+rand_pcg = "0.2.1"

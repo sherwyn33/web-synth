@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sample Recorder Demo</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 2rem;
+        line-height: 1.5;
+      }
+
+      header {
+        margin-bottom: 1.5rem;
+      }
+
+      button {
+        margin-right: 0.75rem;
+        padding: 0.5rem 1rem;
+      }
+
+      label {
+        display: inline-flex;
+        flex-direction: column;
+        font-size: 0.9rem;
+        margin-right: 1.5rem;
+      }
+
+      #status {
+        margin-top: 1rem;
+        font-size: 0.95rem;
+      }
+
+      #waveform {
+        margin-top: 2rem;
+        width: 640px;
+        height: 160px;
+        border: 1px solid #bbb;
+      }
+
+      #log {
+        margin-top: 1.5rem;
+        white-space: pre-wrap;
+        font-size: 0.85rem;
+        background: #f7f7f7;
+        padding: 1rem;
+        border-radius: 0.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Sample Recorder Demo</h1>
+      <p>
+        This page wires up the <code>GranulatorWorkletProcessor</code> and the Rust
+        <code>sample_recorder</code> module so you can record PCM blocks and export a
+        stereo or mono WAV file from the browser.
+      </p>
+    </header>
+
+    <section>
+      <label>
+        Desired channels
+        <select id="channelSelect">
+          <option value="auto">auto (use input layout)</option>
+          <option value="1">force mono</option>
+          <option value="2">force stereo</option>
+        </select>
+      </label>
+      <label>
+        Sample-rate metadata
+        <input id="sampleRate" type="number" value="44100" min="8000" step="1" />
+      </label>
+    </section>
+
+    <section>
+      <button id="init">initialize audio</button>
+      <button id="start">start recording</button>
+      <button id="stop">stop recording</button>
+      <button id="export">export WAV</button>
+      <a id="download" download="recording.wav" style="display: none;">download recording</a>
+    </section>
+
+    <div id="status">status: idle</div>
+    <canvas id="waveform" width="640" height="160"></canvas>
+    <div id="log"></div>
+
+    <script type="module" src="./demo.js"></script>
+  </body>
+</html>

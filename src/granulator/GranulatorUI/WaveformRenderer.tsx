@@ -70,29 +70,32 @@ export class WaveformRenderer {
     this.init(sample);
   }
 
-  public reinitializeCtx(sample?: AudioBuffer | null) {
+  public reinitializeCtx(sample?: AudioBuffer | null, sampleRateOverride?: number) {
+    const sampleRate = sample?.sampleRate ?? sampleRateOverride ?? this.sampleRate ?? 44100;
+    this.sampleRate = sampleRate;
     this.bounds = { startMs: 0, endMs: this.getSampleLengthMs() };
     this.selection = { startMarkPosMs: null, endMarkPosMs: null };
 
-    this.worker.reinitializeCtx(
-      this.widthPx,
-      this.heightPx,
-      (() => {
-        if (!sample) {
-          return undefined;
-        }
+    const sampleData = (() => {
+      if (!sample) {
+        return new Float32Array(0);
+      }
 
-        const sampleData = new Float32Array(sample.length);
-        sample.copyFromChannel(sampleData, 0);
-        return { data: sampleData, sampleRate: sample.sampleRate };
-      })()
-    );
+      const buffer = new Float32Array(sample.length);
+      sample.copyFromChannel(buffer, 0);
+      return buffer;
+    })();
+
+    this.worker.reinitializeCtx(this.widthPx, this.heightPx, {
+      data: sampleData,
+      sampleRate,
+    });
   }
 
   private async init(sample?: AudioBuffer | null) {
     try {
       this.sampleRate = sample?.sampleRate ?? 44100;
-      this.reinitializeCtx(sample);
+      this.reinitializeCtx(sample, this.sampleRate);
       this.updateBoundsCbs();
       this.render();
     } catch (err) {
@@ -152,7 +155,7 @@ export class WaveformRenderer {
   public setSample(sample: AudioBuffer) {
     this.sampleCount = sample.length;
     this.sampleRate = sample?.sampleRate ?? 44100;
-    this.reinitializeCtx(sample);
+    this.reinitializeCtx(sample, this.sampleRate);
     this.updateBoundsCbs();
     this.render();
   }
